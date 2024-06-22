@@ -6,79 +6,79 @@ template<typename T>
 concept MPInt = std::integral<T> || std::same_as<T, long long>;
 
 static void
-generate_parameters(MPInt auto& p, MPInt auto& g)
+generate_parameters(MPInt auto& prime, MPInt auto& generator)
 {
-    p = 23; // Example prime
-    g = 5;  // Example generator
+    prime = 23;
+    generator = 5;
 }
 
 static void
-prover_commitment(const MPInt auto& p, const MPInt auto& g, 
-                  MPInt auto& r, MPInt auto& t)
+prover_commitment(const MPInt auto& prime, const MPInt auto& generator, 
+                  MPInt auto& random_value, MPInt auto& commitment)
 {
     std::random_device rd;
     std::mt19937 gen(rd());
-    std::uniform_int_distribution<long long> dis(0, p - 2); // [0, p-1)
-    r = dis(gen);
-    t = 1;
+    std::uniform_int_distribution<long long> dis(0, prime - 2);
+    random_value = dis(gen);
+    commitment = 1;
     
-    for (MPInt auto i = 0; i < r; ++i)
+    for (MPInt auto i = 0; i < random_value; ++i)
     {
-        t = (t * g) % p;
+        commitment = (commitment * generator) % prime;
     }
 }
 
 static void
-prover_response(const MPInt auto& p, const MPInt auto& r, const MPInt auto& x,
-                const MPInt auto& c, MPInt auto& s)
+prover_response(const MPInt auto& prime, const MPInt auto& random_value, const MPInt auto& private_key,
+                const MPInt auto& challenge, MPInt auto& response)
 {
-    s = (r + c * x) % (p - 1);
+    response = (random_value + challenge * private_key) % (prime - 1);
 }
 
 static bool
-verifier_check(const MPInt auto& p, const MPInt auto& g, const MPInt auto& y,
-               const MPInt auto& t, const MPInt auto& c, const MPInt auto& s)
+verifier_check(const MPInt auto& prime, const MPInt auto& generator, const MPInt auto& public_key,
+               const MPInt auto& commitment, const MPInt auto& challenge, const MPInt auto& response)
 {
-    long long lhs = 1, rhs = t, yc = 1;
+    long long left_hand_side = 1, right_hand_side = commitment, public_key_modulo = 1;
 
-    for (MPInt auto i = 0; i < s; ++i)
+    for (MPInt auto i = 0; i < response; ++i)
     {
-        lhs = (lhs * g) % p;
+        left_hand_side = (left_hand_side * generator) % prime;
     }
 
-    for (MPInt auto i = 0; i < c; ++i)
+    for (MPInt auto i = 0; i < challenge; ++i)
     {
-        yc = (yc * y) % p;
+        public_key_modulo = (public_key_modulo * public_key) % prime;
     }
 
-    rhs = (rhs * yc) % p;
+    right_hand_side = (right_hand_side * public_key_modulo) % prime;
 
-    return lhs == rhs;
+    return left_hand_side == right_hand_side;
 }
 
 int main()
 {
-    long long p, g, x, y, r, t, c, s;
+    long long prime, generator, private_key, public_key, random_value, commitment, challenge, response;
 
-    generate_parameters(p, g);
+    generate_parameters(prime, generator);
 
-    x = 6; // The secret
-    y = 1;
-    for (long long i = 0; i < x; ++i)
+    private_key = 6;
+    public_key = 1;
+    for (long long i = 0; i < private_key; ++i)
     {
-        y = (y * g) % p;
+        public_key = (public_key * generator) % prime;
     }
 
-    prover_commitment(p, g, r, t);
+    prover_commitment(prime, generator, random_value, commitment);
     
     std::random_device rd;
     std::mt19937 gen(rd());
-    std::uniform_int_distribution<long long> dis(0, p - 2);
-    c = dis(gen);
+    std::uniform_int_distribution<long long> dis(0, prime - 2);
+    challenge = dis(gen);
 
-    prover_response(p, r, x, c, s);
+    prover_response(prime, random_value, private_key, challenge, response);
 
-    if (verifier_check(p, g, y, t, c, s))
+    if (verifier_check(prime, generator, public_key, commitment, challenge, response))
     {
         std::cout << "Proof is valid." << std::endl;
     }
