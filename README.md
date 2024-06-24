@@ -46,6 +46,14 @@ The signature *(r, s)* is valid if and only if *$v_1 \equiv r mod p$*.
 ## Complexity
 The theoretical three part program, as well as the simple one posted in the repo, given that *n* is the cardinal number of the digits of the prime number *p*, would be *O(n<sup>3</sup>)*, while its space Complexity is *O(n)*. It is worth noting that each of the programs by itself has this complexity, both for time and space, and combined is *3* times that, i.e., *3O(n<sup>3</sup>)* and *3O(n)*, but due to the nature of the calculation of the complexity, number *3* as a constant, is eliminated.
 
+## Usage
+You can either build the program in Visual Studio 2022 with the language standard set to C++ 20, or build it on a Linux environment by typing the following command:
+```
+g++ -std=c++20 zpk.cpp -o zpk
+```
+
+The user gets to provide the public and private key. This will give the ability to the user to test for the prover's validity of the commitment. 
+
 ## Notes
 For more on Schnorr's digital signature algorithm and the discrete logarithm problem, you can use the following links:<br>  
 [Schnorr signature](https://en.wikipedia.org/wiki/Schnorr_signature)<br>  
