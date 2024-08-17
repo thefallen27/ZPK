@@ -3,7 +3,7 @@
 #include <random>
 
 template<typename T>
-concept MPInt = std::integral<T> || std::same_as<T, long long>;
+concept MPInt = std::integral<T>;
 
 static void
 generate_parameters(MPInt auto& prime, MPInt auto& generator)
